@@ -19,6 +19,7 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color("#ffffff");
 
 //Create Tree's Body Object
+let branchNumber = 5;
 const mesh = new THREE.Mesh(
   new THREE.CylinderGeometry(0.5, 1.2, 36, 64),
   new THREE.MeshBasicMaterial({
@@ -32,9 +33,9 @@ mesh.position.x = 3;
 mesh.position.y = 18;
 
 scene.add(mesh);
+
 //Create Tree's branches Object
 
-let branchNumber = 5;
 const createBranch = (number, branchHeight) => {
   for (let i = 0; i < number; i++) {
     let degreeRandom = 2 * Math.PI * Math.random();
@@ -56,13 +57,6 @@ const createBranch = (number, branchHeight) => {
       4 * Math.cos(degreeRandom)
     );
 
-    // branch.rotateX(Math.PI / 2);
-    // branch.rotation.y = 120;
-    //* (Math.random() > 0.5 ? 1 : -1)
-
-    //  branch.position.set(mesh.position.z, 2,6);
-    //   branch.position.z = 6;
-    // branch.rotateOnWorldAxis(new Vector3(0.1,0.2,0.1), Math.random()*2*Math.PI)
     for (let y = 0; y < 4; y++) {
       let degreeRandom = 2 * Math.PI * Math.random();
       const leaf = new THREE.Mesh(
@@ -84,13 +78,6 @@ const createBranch = (number, branchHeight) => {
         -0.4 * Math.cos(degreeRandom) + Math.cos(degreeRandom)
       );
 
-      // branch.rotateX(Math.PI / 2);
-      // branch.rotation.y = 120;
-      //* (Math.random() > 0.5 ? 1 : -1)
-
-      //  branch.position.set(mesh.position.z, 2,6);
-      //   branch.position.z = 6;
-      // branch.rotateOnWorldAxis(new Vector3(0.1,0.2,0.1), Math.random()*2*Math.PI)
       branch.add(leaf);
     }
 
@@ -133,15 +120,6 @@ window.addEventListener("mousemove", (event) => {
   mouse.y = (-event.clientY / sizes.width) * 2 + 1;
 });
 
-// Handle Object Click
-window.addEventListener("click", () => {
-  if (currentIntersect !== null) {
-    createBranch(1, "Random Height");
-    control.update();
-    renderer.render(scene, camera);
-  }
-});
-
 ///---------------------
 
 // Camera
@@ -151,11 +129,8 @@ const camera = new THREE.PerspectiveCamera(
   0.1,
   1000
 );
-camera.position.set(30, 20, 30);
+camera.position.set(30, 10, 20);
 
-// camera.position.y = 32;
-// camera.lookAt(20,20,20)
-// camera.lookAt( new THREE.Vector3(0, 0, 1));
 scene.add(camera);
 
 //AXES HELPER
@@ -214,6 +189,56 @@ renderer.setSize(sizes.width, sizes.height);
 //   }
 // });
 
+//Handle Configuration
+
+// Remove a Branch
+const removeBranch = () => {
+if (branchNumber > 0) {
+  mesh.children[mesh.children.length - 1].remove();
+  mesh.children[mesh.children.length - 1].geometry.dispose();
+  mesh.children[mesh.children.length - 1].material.dispose();
+  mesh.remove(mesh.children[mesh.children.length - 1]);
+  branchNumber -= 1;
+
+  document.getElementById(
+    "branchNumber"
+  ).innerHTML = `number of branches on the Tree is ${mesh.children.length}`;
+}
+};
+const clickRemoveBranch = document.getElementById("removeBranch");
+
+clickRemoveBranch.addEventListener("click", removeBranch)
+  
+
+//Add a Branch
+const addBranch = () => {
+if (branchNumber <= 15) {
+  createBranch(1, "Random Height");
+  branchNumber += 1;
+  document.getElementById(
+    "branchNumber"
+  ).innerHTML = `number of branches on the Tree is ${mesh.children.length}`;
+}
+};
+const clickAddBranch = document.getElementById("addBranch");
+clickAddBranch.addEventListener("click",addBranch)
+  
+
+
+//Branch Number
+document.getElementById(
+  "branchNumber"
+).innerHTML = `number of branches on the Tree is ${mesh.children.length}`;
+
+// Handle Object Click
+window.addEventListener("click", () => {
+  if (currentIntersect !== null) {
+    createBranch(1, "Random Height");
+    control.update();
+    renderer.render(scene, camera);
+  }
+});
+
 // Animate
 const clock = new THREE.Clock();
 
@@ -221,15 +246,7 @@ const tick = () => {
   const elapsedTime = clock.getElapsedTime();
 
   // Update objects
-  // mesh.rotation.y = elapsedTime;
-  //   camera.position.x = cursor.x * 3;
-  //   camera.position.y = -cursor.y * 3;
-
-  //   camera.position.x = Math.sin(cursor.x * Math.PI * 2) * 3;
-  //   camera.position.z = Math.cos(cursor.x * Math.PI * 2) * 3;
-  //   camera.position.y = cursor.y*15;
-
-  //   camera.lookAt(mesh.position);
+  mesh.rotation.y = elapsedTime;
 
   raycaster.setFromCamera(mouse, camera);
   const intersect = raycaster.intersectObjects([mesh]);
